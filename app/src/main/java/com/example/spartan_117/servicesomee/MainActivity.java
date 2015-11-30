@@ -4,10 +4,8 @@ package com.example.spartan_117.servicesomee;
 import android.app.ListActivity;
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.Network;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -19,9 +17,12 @@ import android.widget.Toast;
 
 import com.example.spartan_117.servicesomee.model.Flower;
 import com.example.spartan_117.servicesomee.parsers.FlowerJSONParser;
+import com.example.spartan_117.servicesomee.parsers.RequestPackage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 public class MainActivity extends ListActivity {
@@ -30,6 +31,8 @@ public class MainActivity extends ListActivity {
     List<MyTask> tasks;
 
     List<Flower> flowerList;
+
+    public static final String PHOTOS_BASE_URL = "http://services.hanselandpetal.com/photos/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +47,8 @@ public class MainActivity extends ListActivity {
 
         tasks = new ArrayList<>();
 
+       // requestData("http://services.hanselandpetal.com/secure/flowers.json");
+        secondRequestData("http://www.lopezesteban.somee.com/api/time");
     }
 
     @Override
@@ -69,6 +74,23 @@ public class MainActivity extends ListActivity {
         return false;
     }
 
+    private void secondRequestData(String uri)
+    {
+        RequestPackage aPackage =new RequestPackage();
+        aPackage.setMethod("POST");
+        aPackage.setUri(uri);
+        aPackage.setParam("Param1", "Value 1");
+        aPackage.setParam("Param2", "Value 2");
+        aPackage.setParam("Param3", "Value 3");
+        aPackage.setParam("Name", "ETB");
+        Map<String,String> map = new HashMap<>();
+        map.put("a","b");
+        aPackage.setOther("other",map);
+
+        SecondTask secondTask = new SecondTask();
+        secondTask.execute(aPackage);
+
+    }
 
     private void requestData(String uri) {
 
@@ -106,7 +128,7 @@ public class MainActivity extends ListActivity {
     }
 
 
-    private class MyTask extends AsyncTask<String,String,String>
+    private class MyTask extends AsyncTask<String,String,List<Flower>>
     {
         @Override
         protected void onPreExecute() {
@@ -120,27 +142,36 @@ public class MainActivity extends ListActivity {
         }
 
         @Override
-        protected String doInBackground(String... params) {
-
-
+        protected List<Flower> doInBackground(String... params) {
          /*   for (int i = 0; i < params.length; i++ )
-            {
-                publishProgress("Working with "+ params[i]);
-
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            { publishProgress("Working with "+ params[i]);
+                 try {Thread.sleep(1000);} catch (InterruptedException e) { e.printStackTrace();} }
               return "Task Complete !";
             */
-          String content = HttpManager.getData(params[0], "feeduser","feedpassword");
-            return content;
+           String content = HttpManager.getData(params[0], "feeduser","feedpassword");
+            flowerList = FlowerJSONParser.parseFeed(content);
+
+            /*
+            for (Flower flower : flowerList)
+            {
+                try {
+                    String imageUrl = PHOTOS_BASE_URL + flower.getPhoto();
+                    InputStream inputStream = (InputStream) new URL(imageUrl).getContent();
+                    Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+                    flower.setBitmap(bitmap);
+                    inputStream.close();
+                }
+                catch (Exception ex)
+                {
+                    ex.printStackTrace();
+                }
+            }
+            */
+            return flowerList;
         }
 
         @Override
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(List<Flower> s) {
 
 
             tasks.remove(this);
@@ -152,7 +183,7 @@ public class MainActivity extends ListActivity {
                 Toast.makeText(MainActivity.this, "Can't connect to web service",Toast.LENGTH_LONG).show();
                 return;
             }
-            flowerList = FlowerJSONParser.parseFeed(s);
+           // flowerList = FlowerJSONParser.parseFeed(s);
             updateDisplay();
 
         }
@@ -160,6 +191,21 @@ public class MainActivity extends ListActivity {
         @Override
         protected void onProgressUpdate(String... values) {
      //       updateDisplay(values[0]);
+        }
+    }
+
+    private class SecondTask extends AsyncTask<RequestPackage,String,String>
+    {
+
+        @Override
+        protected String doInBackground(RequestPackage... params) {
+            String content = HttpManagerSecond.getData(params[0]);
+            return content;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            output.append(s);
         }
     }
 }

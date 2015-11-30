@@ -5,7 +5,7 @@
     <ImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:id="@+id/imageView"
+        android:id="@+id/imageView1"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
@@ -21,7 +21,19 @@
         android:layout_marginLeft="10dp"
         android:layout_alignParentTop="true"
         android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/imageView"
-        android:layout_toEndOf="@+id/imageView"
+        android:layout_toRightOf="@+id/imageView1"
+        android:layout_toEndOf="@+id/imageView1"
         android:textAppearance="?android:attr/textAppearanceLarge"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Text"
+        android:id="@+id/textView2"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/textView1"
+        android:layout_marginLeft="31dp"
+        android:layout_marginStart="31dp"
+        android:layout_alignBottom="@+id/textView1" />
+
 </RelativeLayout>
